@@ -10,7 +10,6 @@ from dataclasses import dataclass
 from pathlib import Path
 
 DB_DIR = Path("data/spider/database")
-QUERY_TIMEOUT_SECONDS = 10
 
 
 @dataclass
@@ -34,11 +33,6 @@ def execute(db_id: str, query: str) -> ExecutionResult:
     except Exception as e:
         return ExecutionResult(ok=False, error=f"connection failed: {e}")
 
-    interrupted = False
-
-    def guard():
-        return 1 if interrupted else 0
-
     try:
         rows = con.execute(query).fetchall()
         return ExecutionResult(ok=True, rows=rows)
@@ -48,22 +42,32 @@ def execute(db_id: str, query: str) -> ExecutionResult:
         con.close()
 
 
-def _normalize_value(v):
-    """Make 5 and 5.0 compare equal; render everything else as a string."""
+def _normalize_value(v) -> str:
+    """Render a cell as a comparable string.
+
+    Spider databases store many numeric columns as TEXT, so a gold query's
+    max(age) returns "9" while a candidate's max(CAST(age AS INTEGER))
+    returns 9. These are the same answer and must compare equal. Numeric
+    strings are therefore parsed and formatted the same way as numbers.
+    """
     if v is None:
-        return None
+        return "NULL"
     if isinstance(v, bool):
         return str(v)
     if isinstance(v, (int, float)):
-        f = float(v)
-        return round(f, 6)
-    return str(v).strip()
+        return f"{round(float(v), 6):g}"
+
+    s = str(v).strip()
+    try:
+        return f"{round(float(s), 6):g}"
+    except ValueError:
+        return s
 
 
 def _normalize_rows(rows, order_matters: bool):
     """Rows become sorted tuples; the row list is sorted unless order matters."""
     normalized = [
-        tuple(sorted((str(_normalize_value(v)) for v in row)))
+        tuple(sorted(_normalize_value(v) for v in row))
         for row in rows
     ]
     if order_matters:

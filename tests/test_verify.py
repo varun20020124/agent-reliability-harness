@@ -48,3 +48,10 @@ def test_duplicates_are_not_collapsed():
 def test_readonly_prevents_writes():
     r = execute(DB, "DROP TABLE singer")
     assert not r.ok
+
+def test_numeric_string_matches_number():
+    """Gold returns text '9'; a CAST version returns int 9. Same answer."""
+    v = verify("dog_kennels",
+               "SELECT max(age) FROM Dogs",
+               "SELECT max(CAST(age AS INTEGER)) FROM Dogs")
+    assert v["correct"]
