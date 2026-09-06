@@ -19,12 +19,19 @@ load_dotenv()
 _client = None
 
 
+# def _get_client() -> OpenAI:
+#     global _client
+#     if _client is None:
+#         if not os.getenv("OPENAI_API_KEY"):
+#             raise RuntimeError("OPENAI_API_KEY not set")
+#         _client = OpenAI()
+#     return _client
 def _get_client() -> OpenAI:
     global _client
     if _client is None:
         if not os.getenv("OPENAI_API_KEY"):
             raise RuntimeError("OPENAI_API_KEY not set")
-        _client = OpenAI()
+        _client = OpenAI(timeout=30.0, max_retries=2)
     return _client
 
 
