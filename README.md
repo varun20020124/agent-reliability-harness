@@ -94,6 +94,8 @@ python scripts/plot_results.py
 
 Runs are resumable — re-running an identical command skips completed trials, so a crash or network stall costs nothing. Total cost for all runs reported here was approximately 1.8M tokens, under two dollars.
 
+All 3,006 trials from the runs reported here are committed in `results/trials.db`, including the generated SQL for every trial, so the numbers can be verified without re-running anything.
+
 ## Layout
 
 ```
