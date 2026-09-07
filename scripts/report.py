@@ -6,7 +6,7 @@ BASELINE = "baseline"
 
 
 def main():
-    summaries = all_summaries()
+    summaries = all_summaries(run_id="v2")
 
     print("BASELINE — reliability by model\n")
     print(f"{'model':<16} {'pass@k':>8} {'pass^k':>8} {'gap':>7} "
@@ -29,8 +29,10 @@ def main():
               f"{s.mean_trial_accuracy:>10.1%} {s.flaky:>7}")
 
     print("\n\nFLAKY TASKS (baseline, gpt-4.1-nano)\n")
-    for task_id, wins, k in flaky_tasks(BASELINE, "gpt-4.1-nano"):
+    for task_id, wins, k in flaky_tasks(BASELINE, "gpt-4.1-nano", run_id="v2"):
         print(f"  {task_id}  {wins}/{k}")
+    # for task_id, wins, k in flaky_tasks(BASELINE, "gpt-4.1-nano"):
+    #     print(f"  {task_id}  {wins}/{k}")
 
 
 if __name__ == "__main__":
